@@ -20,6 +20,10 @@ The sample labels are research intentions, not verified classifications. Yahoo t
 
 Next: inspect the real gaps, test issuer supplementation for material missing fields, then demonstrate comparison and transparent selection on the broader pool. No portfolio recommendation or suitability claim is made.
 
+## Observed first pass
+
+On 17 November 2026, all 24 sample listings returned recent daily prices and ETF quote types. Category coverage was 12/12 US and 0/12 EU; nonempty reported holdings were 9/12 US and 7/12 EU. These are field-availability observations, not validation of accuracy or investment eligibility. See the [feasibility assessment and next step](docs/feasibility-2026-11-17.md) and [per-listing report](docs/coverage-2026-11-17.md).
+
 Yahoo/yfinance is an unofficial research route; access and reuse remain subject to source terms. See [yfinance](https://github.com/ranaroussi/yfinance) and [Yahoo terms](https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html). Raw provider responses are not committed.
 
 The previous project's outcome and lessons are preserved in [retirement.md](retirement.md).
