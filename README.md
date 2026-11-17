@@ -27,3 +27,19 @@ On 17 November 2026, all 24 sample listings returned recent daily prices and ETF
 Yahoo/yfinance is an unofficial research route; access and reuse remain subject to source terms. See [yfinance](https://github.com/ranaroussi/yfinance) and [Yahoo terms](https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html). Raw provider responses are not committed.
 
 The previous project's outcome and lessons are preserved in [retirement.md](retirement.md).
+
+## Continuous integration
+
+GitHub Actions runs the offline tests on pull requests targeting `main` and on
+pushes to `main`. The single Windows job uses Python 3.14.0 and uv 0.9.7, installs
+the locked dependencies, then runs `uv run --offline --no-sync pytest`.
+
+Dependency installation needs network access. The tests use supplied inputs;
+the workflow does not run the live Yahoo or issuer collectors and does not need
+the ignored local evidence. It performs no deployment. To run the same checks
+locally with Python 3.14.0 selected:
+
+```powershell
+uv sync --locked --dev --python 3.14.0
+uv run --offline --no-sync pytest
+```
