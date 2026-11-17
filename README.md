@@ -65,3 +65,19 @@ is not distributed with the repository. A report distinguishes extracted source
 claims, dated composition, undated fields and failures. Missing base currency or
 hedging is not filled from a trading or performance currency. Bond measures are
 not universal equity requirements. No selection or allocation is implemented.
+
+## Continuous integration
+
+GitHub Actions runs the offline tests on pull requests targeting `main` and on
+pushes to `main`. The single Windows job uses Python 3.14.0 and uv 0.9.7, installs
+the locked dependencies, then runs `uv run --offline --no-sync pytest`.
+
+Dependency installation needs network access. The tests use supplied inputs;
+the workflow does not run the live Yahoo or issuer collectors and does not need
+the ignored local evidence. It performs no deployment. To run the same checks
+locally with Python 3.14.0 selected:
+
+```powershell
+uv sync --locked --dev --python 3.14.0
+uv run --offline --no-sync pytest
+```
