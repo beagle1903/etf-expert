@@ -1,0 +1,194 @@
+[
+  {
+    "symbol": "VWCE.DE",
+    "kind": "factsheet",
+    "url": "https://fund-docs.vanguard.com/FTSE_All-World_UCITS_ETF_USD_Accumulating_9679_EU_INT_UK_EN.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "VAGF.DE",
+    "kind": "factsheet",
+    "url": "https://fund-docs.vanguard.com/Global_Aggregate_Bond_UCITS_ETF_EUR_Hedged_Accumulating_9443_EU_INT_UK_EN.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "SXR8.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/cspx-ishares-core-s-p-500-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "EUNA.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/aggh-ishares-core-global-aggregate-bond-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "EUNL.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/swda-ishares-core-msci-world-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "IS3N.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/eimi-ishares-core-msci-em-imi-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "IUSN.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/wsml-ishares-msci-world-small-cap-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "SXRV.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/csndx-ishares-nasdaq-100-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "EXSA.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/exsa-ishares-stoxx-europe-600-ucits-etf-de-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "IBGS.AS",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/ibgs-ishares-govt-bond-1-3yr-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "IEAC.AS",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/ieac-ishares-core-corp-bond-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "IBCI.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/ibci-ishares-inflation-linked-govt-bond-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "VTI",
+    "kind": "factsheet",
+    "url": "https://fund-docs.vanguard.com/F0970.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "VEA",
+    "kind": "factsheet",
+    "url": "https://fund-docs.vanguard.com/F0936.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "VWO",
+    "kind": "factsheet",
+    "url": "https://fund-docs.vanguard.com/F0964.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "VT",
+    "kind": "factsheet",
+    "url": "https://fund-docs.vanguard.com/F3141.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "BND",
+    "kind": "factsheet",
+    "url": "https://fund-docs.vanguard.com/F0928.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "IWM",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/us/literature/fact-sheet/iwm-ishares-russell-2000-etf-fund-fact-sheet-en-us.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "AGG",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/us/literature/fact-sheet/agg-ishares-core-us-aggregate-bond-etf-fund-fact-sheet-en-us.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "SHY",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/us/literature/fact-sheet/shy-ishares-1-3-year-treasury-bond-etf-fund-fact-sheet-en-us.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "TIP",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/us/literature/fact-sheet/tip-ishares-tips-bond-etf-fund-fact-sheet-en-us.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "LQD",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/us/literature/fact-sheet/lqd-ishares-iboxx-investment-grade-corporate-bond-etf-fund-fact-sheet-en-us.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "SPY",
+    "kind": "factsheet",
+    "url": "https://www.ssga.com/library-content/products/factsheets/etfs/us/factsheet-us-en-spy.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "QQQ",
+    "kind": "factsheet",
+    "url": "https://www.invesco.com/us-rest/contentdetail?contentId=1b6ee2b7fe2ef410VgnVCM100000c2f1bf0aRCRD",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "AGG",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/us/literature/fact-sheet/agg-ishares-core-u-s-aggregate-bond-etf-fund-fact-sheet-en-us.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "IBCI.DE",
+    "kind": "factsheet",
+    "url": "https://www.ishares.com/gls-download/literature/fact-sheet/ibci-ishares-eur-inflation-linked-govt-bond-ucits-etf-fund-fact-sheet-en-de.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "QQQ",
+    "kind": "factsheet",
+    "url": "https://www.invesco.com/content/dam/invesco/us/en/product-documents/etf/fact-sheet/qqq-invesco-qqq-etf-fact-sheet.pdf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "QQQ",
+    "kind": "product",
+    "url": "https://www.invesco.com/us/en/financial-products/etfs/invesco-qqq-trust-series-1.html",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "IBCI.DE",
+    "kind": "product",
+    "url": "https://www.ishares.com/uk/individual/en/products/251739/ishares-inflation-linked-govt-bond-ucits-etf",
+    "note": "Manually located source candidate; URL alone does not establish listing/share-class identity. Failed candidates retained."
+  },
+  {
+    "symbol": "SXR8.DE",
+    "kind": "holdings",
+    "url": "https://www.ishares.com/uk/individual/en/products/253743/ishares-sp-500-b-ucits-etf-acc-fund/latest-holdings.csv",
+    "note": "IBCI link observed in downloaded product HTML; other product IDs use the same candidate route. Response and content must be checked; no identity assumed."
+  },
+  {
+    "symbol": "EUNA.DE",
+    "kind": "holdings",
+    "url": "https://www.ishares.com/uk/individual/en/products/291770/ishares-core-global-aggregate-bond-ucits-etf-aggh-hedged/latest-holdings.csv",
+    "note": "IBCI link observed in downloaded product HTML; other product IDs use the same candidate route. Response and content must be checked; no identity assumed."
+  },
+  {
+    "symbol": "IBCI.DE",
+    "kind": "holdings",
+    "url": "https://www.ishares.com/uk/individual/en/products/251739/ishares-eur-inflation-linked-govt-bond-ucits-etf/latest-holdings.csv",
+    "note": "IBCI link observed in downloaded product HTML; other product IDs use the same candidate route. Response and content must be checked; no identity assumed."
+  }
+]
