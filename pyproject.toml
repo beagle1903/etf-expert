@@ -3,7 +3,10 @@ name = "etf-expert"
 version = "0.1.0"
 description = "Local ETF data feasibility and research tools"
 requires-python = ">=3.12"
-dependencies = ["yfinance>=0.2.66,<1"]
+dependencies = [
+    "pypdfium2>=5.15.2",
+    "yfinance>=0.2.66,<1",
+]
 
 [dependency-groups]
 dev = ["pytest>=8,<10"]

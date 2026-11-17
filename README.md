@@ -27,3 +27,41 @@ On 17 November 2026, all 24 sample listings returned recent daily prices and ETF
 Yahoo/yfinance is an unofficial research route; access and reuse remain subject to source terms. See [yfinance](https://github.com/ranaroussi/yfinance) and [Yahoo terms](https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html). Raw provider responses are not committed.
 
 The previous project's outcome and lessons are preserved in [retirement.md](retirement.md).
+
+## Official issuer supplementation experiment
+
+Issue #1 tested the same 24 listings against official sources. See the
+[dated assessment](docs/issuer-feasibility-2026-11-17.md) and
+[per-listing field report](docs/issuer-coverage-2026-11-17.md).
+The result is **change the route before scaling**: 23 parsed factsheets and a
+limited QQQ product-page fallback supply useful facts, but do not establish a
+complete, permitted, unattended research service.
+
+`data/issuer_sources.json` contains manually located URL candidates, including
+failed candidates. It is an experiment manifest, not a catalogue or eligibility
+list. Raw PDFs, HTML, extracted text, collection metadata and JSON assessments
+remain in ignored `data/runs/`. The only new runtime dependency is `pypdfium2`
+for extracting the downloaded factsheets.
+
+Live collection command (review the source-specific access limitations in the
+assessment before repeating downloads):
+
+```powershell
+uv run python scripts/check_issuers.py
+# Explicit probe; it does not establish coverage of the complete sample:
+uv run python scripts/check_issuers.py --symbols VWCE.DE VAGF.DE SXR8.DE EUNA.DE --kinds factsheet
+```
+
+Replay the actual saved evidence without network access:
+
+```powershell
+uv run python scripts/assess_issuers.py data/runs/issuers-20261117T174001860718Z data/runs/issuers-20261117T174127895555Z data/runs/issuers-20261117T174613957126Z --output data/runs/issuers-20261117T174613957126Z/assessment.md
+uv run pytest
+```
+
+The replay writes Markdown plus a paired JSON assessment. On another machine,
+use locally collected run folders in chronological order; the ignored evidence
+is not distributed with the repository. A report distinguishes extracted source
+claims, dated composition, undated fields and failures. Missing base currency or
+hedging is not filled from a trading or performance currency. Bond measures are
+not universal equity requirements. No selection or allocation is implemented.
