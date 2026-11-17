@@ -32,6 +32,17 @@ def match(pattern, text):
     return found.group(1).strip() if found else None
 
 
+def bond_applicability(intent):
+    """Sample intention only; unknown never means equity non-applicability."""
+    if not isinstance(intent, str):
+        return None
+    if re.search(r'\bbonds?\b|\btreasur(?:y|ies)\b', intent, re.I):
+        return True
+    if re.search(r'\bequity\b', intent, re.I):
+        return False
+    return None
+
+
 def parse(text, symbol, url):
     text = clean(text)
     fields = {name: None for name in FIELDS}
@@ -61,7 +72,7 @@ def parse(text, symbol, url):
     # Colon-delimited iShares data are constrained by the next known label.
     if 'ishares.com' in url:
         put('legal_entity', match(r'Issuing Company\s*:\s*(.*?)\s+Product Structure', text), as_of=result['source_dates']['other'])
-        put('net_assets', match(r'Net Assets of Fund \(M\)\s*:\s*([\d,.$]+(?:\s+[A-Z]{3})?)', text), 'million; currency as printed, $ not silently treated as USD', result['source_dates']['composition'])
+        put('net_assets', match(r'Net Assets of Fund \(M\)\s*:\s*(\$[\d,.]+|[\d,.]+(?:\s+(?:USD|EUR|GBP|CHF|JPY|CAD|AUD)\b)?)', text), 'million; currency as printed, $ not silently treated as USD', result['source_dates']['composition'])
         put('share_assets', match(r'Net Assets of Share Class \(M\)\s*:\s*([\d,.]+\s+[A-Z]{3})', text), 'million; share class', result['source_dates']['composition'])
         put('benchmark', match(r'Benchmark\s*:\s*(.*?)\s+Fund Launch Date', text), as_of=result['source_dates']['other'])
         put('share_currency', match(r'Share Class Currency\s*:\s*([A-Z]{3})', text), as_of=result['source_dates']['other'])
@@ -156,8 +167,6 @@ def parse(text, symbol, url):
             codes, units = ric.split(), currencies.split()
             if len(codes) == len(units) and symbol in codes:
                 result['listing_currency'] = units[codes.index(symbol)]
-    # Non-applicable bond fields are distinguishable from missing bond evidence.
-    result['bond_measures_applicable'] = bool(re.search(r'Fixed Income|Bond UCITS ETF|Total Bond Market ETF', text[:500] + text[text.find('KEY FACTS'):text.find('KEY FACTS')+100]))
     return result
 
 
@@ -205,7 +214,8 @@ def report(rows, attempts):
                   'Header: '+row.get('header', 'Missing'), '',
                   '| Field | Source value | Unit / scope | Observation date |', '|---|---|---|---|']
         for field,value in row['fields'].items():
-            absent = 'Not applicable to equity sample intention' if field in ('duration','maturity','credit_quality') and not row.get('bond_measures_applicable') else 'MISSING / unresolved'
+            applicable = row.get('bond_measures_applicable', bond_applicability(row.get('intent')))
+            absent = 'Not applicable to equity sample intention' if field in ('duration','maturity','credit_quality') and applicable is False else 'MISSING / unresolved'
             cells = [str(value['value']), str(value['unit'] or ''), str(value['as_of'] or 'unresolved')] if value else [absent, '', '']
             lines.append('| '+field+' | '+' | '.join(c.replace('|','/').replace('\n',' ') for c in cells)+' |')
         lines += ['', *['- '+w for w in row.get('warnings', [])], '', 'Attempts:', '']
@@ -233,6 +243,8 @@ def main():
             elif a['symbol']=='QQQ' and a['kind']=='product' and not a['error']:
                 selected['QQQ'] = {**parse_product((folder/a['raw_file']).read_text(encoding='utf-8')), 'url':a['url'], 'collected_at_utc':a['collected_at_utc']}
     rows = [{**member, **selected.get(member['symbol'], {'fields':dict.fromkeys(FIELDS), 'warnings':['No parsed factsheet; product-page fallback requires separate review.']})} for member in universe]
+    for row in rows:
+        row['bond_measures_applicable'] = bond_applicability(row.get('intent'))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(report(rows, attempts), encoding='utf-8')
     args.output.with_suffix('.json').write_text(json.dumps({'rows':rows, 'attempts':attempts},indent=2),encoding='utf-8')

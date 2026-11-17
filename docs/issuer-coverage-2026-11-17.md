@@ -272,7 +272,7 @@ Header: IWM iShares Russell 2000 ETF Fact Sheet as of September 30, 2026 FUND DE
 | legal_entity | MISSING / unresolved |  |  |
 | benchmark | Russell 2000 Index |  | 2026-09-30 |
 | fee | 0.19 | percent per year; Expense Ratio | 2026-09-30 |
-| net_assets | $78,041.73 FEE | million; currency as printed, $ not silently treated as USD | 2026-09-30 |
+| net_assets | $78,041.73 | million; currency as printed, $ not silently treated as USD | 2026-09-30 |
 | share_assets | MISSING / unresolved |  |  |
 | base_currency | MISSING / unresolved |  |  |
 | share_currency | MISSING / unresolved |  |  |
@@ -347,7 +347,7 @@ Header: AGG iShares Core U.S. Aggregate Bond ETF Fact Sheet as of September 30, 
 | legal_entity | MISSING / unresolved |  |  |
 | benchmark | Bloomberg US Aggregate Bond Index |  | 2026-09-30 |
 | fee | 0.03 | percent per year; Expense Ratio | 2026-09-30 |
-| net_assets | $135,651.66 FEE | million; currency as printed, $ not silently treated as USD | 2026-09-30 |
+| net_assets | $135,651.66 | million; currency as printed, $ not silently treated as USD | 2026-09-30 |
 | share_assets | MISSING / unresolved |  |  |
 | base_currency | MISSING / unresolved |  |  |
 | share_currency | MISSING / unresolved |  |  |
@@ -386,7 +386,7 @@ Header: SHY iShares 1-3 Year Treasury Bond ETF Fact Sheet as of September 30, 20
 | legal_entity | MISSING / unresolved |  |  |
 | benchmark | ICE U.S. Treasury 1-3 Year Bond Index |  | 2026-09-30 |
 | fee | 0.15 | percent per year; Expense Ratio | 2026-09-30 |
-| net_assets | $26,281.54 FEE | million; currency as printed, $ not silently treated as USD | 2026-09-30 |
+| net_assets | $26,281.54 | million; currency as printed, $ not silently treated as USD | 2026-09-30 |
 | share_assets | MISSING / unresolved |  |  |
 | base_currency | MISSING / unresolved |  |  |
 | share_currency | MISSING / unresolved |  |  |
@@ -423,7 +423,7 @@ Header: TIP iShares TIPS Bond ETF Fact Sheet as of September 30, 2026 FUND DESCR
 | legal_entity | MISSING / unresolved |  |  |
 | benchmark | ICE U.S. Treasury Inflation Linked Bond Index |  | 2026-09-30 |
 | fee | 0.18 | percent per year; Expense Ratio | 2026-09-30 |
-| net_assets | $14,229.89 FEE | million; currency as printed, $ not silently treated as USD | 2026-09-30 |
+| net_assets | $14,229.89 | million; currency as printed, $ not silently treated as USD | 2026-09-30 |
 | share_assets | MISSING / unresolved |  |  |
 | base_currency | MISSING / unresolved |  |  |
 | share_currency | MISSING / unresolved |  |  |
@@ -460,7 +460,7 @@ Header: LQD iShares iBoxx $ Investment Grade Corporate Bond ETF Fact Sheet as of
 | legal_entity | MISSING / unresolved |  |  |
 | benchmark | Markit iBoxx USD Liquid Investment Grade Index |  | 2026-06-30 |
 | fee | 0.14 | percent per year; Expense Ratio | 2026-06-30 |
-| net_assets | $33,113.14 FEE | million; currency as printed, $ not silently treated as USD | 2026-06-30 |
+| net_assets | $33,113.14 | million; currency as printed, $ not silently treated as USD | 2026-06-30 |
 | share_assets | MISSING / unresolved |  |  |
 | base_currency | MISSING / unresolved |  |  |
 | share_currency | MISSING / unresolved |  |  |

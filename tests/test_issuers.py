@@ -1,6 +1,7 @@
 import importlib.util
 import json
 from pathlib import Path
+import sys
 
 def module(name):
     spec = importlib.util.spec_from_file_location(name, Path(__file__).parents[1] / 'scripts' / (name+'.py'))
@@ -87,3 +88,42 @@ def test_report_keeps_all_missing_candidate_and_failures():
     report = assess.report(rows, attempts)
     assert '## X' in report and 'HTTP 404' in report and 'MISSING / unresolved' in report
     assert '| fee | 0 | 0 |' in report
+    assert 'Not applicable to equity' not in report  # unknown intention remains missing
+
+
+def test_asset_amount_does_not_consume_following_heading():
+    for heading in ('FEE DETAILS', 'FEES AND EXPENSES BREAKDOWN'):
+        r = assess.parse('IWM Net Assets of Fund (M) : $78,041.73 '+heading, 'IWM', 'https://www.ishares.com/x.pdf')
+        assert r['fields']['net_assets']['value'] == '$78,041.73'
+    for currency in ('USD', 'EUR'):
+        r = assess.parse('iShares Example UCITS ETF Net Assets of Fund (M) : 14,565.57 '+currency+' SFDR Classification : Other', 'X.DE', 'https://www.ishares.com/x.pdf')
+        assert r['fields']['net_assets']['value'] == '14,565.57 '+currency
+    r = assess.parse('Net Assets of Fund (M) : 12.34 EUROPE', 'X', 'https://www.ishares.com/x.pdf')
+    assert r['fields']['net_assets']['value'] == '12.34'
+
+
+def test_subset_replay_retains_missing_bond_evidence(tmp_path, monkeypatch):
+    universe = json.loads((Path(__file__).parents[1]/'data/universe.json').read_text())
+    (tmp_path/'universe.json').write_text(json.dumps(universe))
+    (tmp_path/'equity.txt').write_text('iShares Example UCITS ETF ISIN : IE00B5BMR087')
+    attempts = [
+        {'symbol':'SXR8.DE', 'kind':'factsheet', 'error':None, 'text_file':'equity.txt', 'url':'https://www.ishares.com/equity.pdf', 'collected_at_utc':'2026-11-17T00:00:00Z'},
+        {'symbol':'BND', 'kind':'factsheet', 'error':'download failed', 'status':404, 'url':'https://fund-docs.vanguard.com/F0928.pdf', 'collected_at_utc':'2026-11-17T00:00:01Z'},
+    ]
+    (tmp_path/'collection.json').write_text(json.dumps({'results':attempts}))
+    output = tmp_path/'report.md'
+    monkeypatch.setattr(sys, 'argv', ['assess_issuers.py', str(tmp_path), '--output', str(output)])
+    assess.main()
+    rows = {r['symbol']:r for r in json.loads(output.with_suffix('.json').read_text())['rows']}
+    assert len(rows) == 24
+    for symbol in ('BND', 'AGG', 'SHY', 'VAGF.DE'):
+        assert rows[symbol]['bond_measures_applicable'] is True
+        assert rows[symbol]['fields']['duration'] is None
+        section = output.read_text(encoding='utf-8').split('## '+symbol+'\n', 1)[1].split('\n## ', 1)[0]
+        assert '| duration | MISSING / unresolved |' in section
+        assert '| credit_quality | MISSING / unresolved |' in section
+        assert 'Not applicable to equity' not in section
+    assert rows['SXR8.DE']['bond_measures_applicable'] is False
+    assert rows['SPY']['bond_measures_applicable'] is False
+    assert assess.bond_applicability(None) is None
+    assert assess.bond_applicability('Unclassified strategy') is None

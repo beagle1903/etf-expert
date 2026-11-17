@@ -165,12 +165,20 @@ Local evidence folders:
 UTC collection times above correspond to 20:39–20:46 Istanbul. The earlier
 Yahoo run `data/runs/20261117T172137188429Z/` is preserved untouched.
 
-Offline verification: ten tests passed (three existing Yahoo tests and seven
+Offline verification: twelve tests passed (three existing Yahoo tests and nine
 issuer tests). They cover field-specific dates and fee units, zero/missing
 distinction, prose mistaken for an identifier, absent hedging, conflicting date
 statements and duration footnotes, graph headings without numeric evidence,
 limited QQQ JSON-LD fallback, HTTP-200 HTML failure, and retention of a missing
-candidate in reports. These tests do not establish live source reliability.
+candidate in reports. Review regression checks also cover asset amounts followed
+by fee headings and subset replays with failed/uncollected bond listings. These
+tests do not establish live source reliability.
+
+PR review corrections: dollar-prefixed iShares assets stop at the amount rather
+than consuming the following fee heading as a currency. Bond applicability now
+comes from sample intentions independently of collection success, with unknown
+intentions left unresolved. The committed report and local paired JSON reports
+were regenerated from the saved responses; no new live collection was performed.
 
 Visual review covered VWCE pages 1/3, VAGF pages 1/3, SXR8 page 1, EUNA pages
 1/3, VTI page 1, SPY pages 1/2, EXSA page 3 and IBCI page 3. It confirmed
