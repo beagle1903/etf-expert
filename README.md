@@ -82,6 +82,13 @@ Use your local run folders. Omit `--yahoo-run` for an issuer-only conversion.
 Regenerate any earlier assessment JSON from its saved run folders so the
 converter receives each successful issuer observation.
 
+## Broader coverage pilot
+
+Issue #3 tested venue-level discovery and bulk research for 40 additional
+listings across US and Xetra equity and bond groups. All 40 yielded partial
+research. The saved sources left material comparison evidence unresolved
+for every listing. See the [scope, observed gaps and replay commands](docs/broader-coverage-2026-11-18.md).
+
 ## Continuous integration
 
 GitHub Actions runs the offline tests on pull requests targeting `main` and on
