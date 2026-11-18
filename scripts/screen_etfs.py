@@ -122,7 +122,7 @@ def share_class(record):
     kind, value = identifier.get("type"), identifier.get("value")
     if (not conflict(record, "identifier") and kind in IDENTIFIERS
             and isinstance(value, str) and re.fullmatch(IDENTIFIERS[kind], value)
-            and record["listing"]["venue"] and source_url(record.get("listing_source"))
+            and record["listing"].get("venue") and source_url(record.get("listing_source"))
             and source_url(record.get("fee_and_exposure_source"))):
         return f"{kind}:{value}"
     return None
@@ -182,7 +182,7 @@ def bond_evidence(record, filters):
 
 def assess(record, filters):
     listing = record["listing"]
-    symbol, market, venue = listing["symbol"], listing["market"], listing["venue"]
+    symbol, market, venue = listing["symbol"], listing["market"], listing.get("venue")
     strategy = listing.get("strategy")
     currency = record.get("trading_currency")
     excluded, failures, unknown, passed = [], [], [], []
@@ -280,12 +280,14 @@ def assess(record, filters):
 
 
 def compare(records, filters):
-    keys = [(row["listing"]["market"], row["listing"]["venue"], row["listing"]["symbol"]) for row in records]
-    if len(set(keys)) != len(keys):
-        raise ValueError("Snapshot contains duplicate market/venue/symbol keys")
-    return [assess(row, filters) for row in sorted(records, key=lambda r: (
-        r["listing"]["market"], r["listing"]["venue"], r["listing"]["symbol"]
-    ))]
+    by_listing = {}
+    for record in records:
+        listing = record["listing"]
+        key = listing["market"], listing.get("venue") or "", listing["symbol"]
+        if key in by_listing:
+            raise ValueError("Snapshot contains duplicate market/venue/symbol keys")
+        by_listing[key] = record
+    return [assess(by_listing[key], filters) for key in sorted(by_listing)]
 
 
 def cell(value):
@@ -345,7 +347,8 @@ def report(rows, filters):
     for row in rows:
         r = row["record"]
         listing = r["listing"]
-        label = f"{listing['symbol']} · {VENUE_NAMES.get(listing['venue'], listing['venue'])}"
+        venue = listing.get("venue") or "unresolved venue"
+        label = f"{listing['symbol']} · {VENUE_NAMES.get(venue, venue)}"
         if row["identity"]:
             classes[row["identity"]].append(label)
         exposure = r.get("exposure")

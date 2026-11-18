@@ -103,14 +103,17 @@ def test_cli_saves_source_linked_report_without_dropping_unresolved_rows(tmp_pat
     snapshot = tmp_path / "cohort.json"
     missing = deepcopy(listing("MISS"))
     missing["bond_risk"] = None
-    snapshot.write_text(json.dumps({"records": [listing(), missing]}), encoding="utf-8")
+    missing_venue = listing("NOVENUE")
+    missing_venue["listing"]["venue"] = None
+    snapshot.write_text(json.dumps({"records": [listing(), missing, missing_venue]}), encoding="utf-8")
     output = tmp_path / "screen.md"
     script = Path(__file__).parents[1] / "scripts" / "screen_etfs.py"
     result = subprocess.run([
         sys.executable, str(script), str(snapshot), "--as-of", "2026-11-18",
         "--fee-cap", "ter=20", "--output", str(output),
     ], check=True, capture_output=True, text=True)
-    assert json.loads(result.stdout.splitlines()[-1])["unknown"] == 1
+    assert json.loads(result.stdout.splitlines()[-1])["unknown"] == 2
     text = output.read_text(encoding="utf-8")
-    assert "**Input** 2" in text and "**Comparison-ready** 1" in text
+    assert "**Input** 3" in text and "**Comparison-ready** 1" in text
     assert "MISS" in text and "https://fund.example/evidence" in text
+    assert "NOVENUE · unresolved venue" in text and "venue or asset class unresolved" in text
