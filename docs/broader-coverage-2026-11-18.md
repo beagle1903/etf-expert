@@ -1,5 +1,8 @@
 # Broader ETF coverage — 18 November 2026
 
+The [follow-up on configured issuer feeds](issuer-feed-followup-2026-11-18.md)
+adds share-class identifiers and undated duration to this same cohort.
+
 ## Scope set before collection
 
 Test 40 additional listings, with 10 iShares equity and 10 iShares bond

@@ -5,7 +5,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "scripts"))
 import check_broader_coverage as pilot
-from broader_snapshot import parse_nasdaq, parse_xetra, select_candidates
+from broader_snapshot import parse_issuer_screener, parse_nasdaq, parse_xetra, research, select_candidates
 
 
 NASDAQ = """Nasdaq Traded|Symbol|Security Name|Listing Exchange|ETF|Test Issue
@@ -94,3 +94,46 @@ def test_incomplete_nasdaq_refresh_preserves_earlier_parseable_snapshot(tmp_path
     error = report["parse_outcomes"][-1]["error"]
     assert "Incomplete source row at line 2" in error
     assert "Security Name" in error
+
+
+def test_screener_join_requires_attribution_and_does_not_borrow_dates(tmp_path):
+    us = """{
+        "100": {"productType": "ISHARES_FUND_DATA", "productView": ["etf"],
+                "localExchangeTicker": "AGZ", "isin": "US4642881662", "aladdinAssetClass": "Fixed Income",
+                "effectiveDuration": {"d": "3.37", "r": 3.37}, "fees": {"d": "0.15", "r": 0.15},
+                "navAmountAsOf": {"d": "Nov 17, 2026", "r": 20261117}},
+        "101": {"productType": "ISHARES_FUND_DATA", "productView": ["etf"],
+                "localExchangeTicker": "AGZ", "isin": "US4642882579", "aladdinAssetClass": "Equity"}
+    }"""
+    eu = """{
+        "200": {"productType": "ISHARES_FUND_DATA", "productView": ["etf"],
+                "localExchangeTicker": "ANOTHER", "isin": "IE000Q0UH3Y7", "aladdinAssetClass": "Anleihen",
+                "effectiveDuration": {"d": "0,00", "r": 0}, "ter": {"d": "0,10", "r": 0.10}}
+    }"""
+    attempts = [
+        save_response(tmp_path, "nasdaq", NASDAQ, 0),
+        save_response(tmp_path, "xetra", XETRA, 1),
+        save_response(tmp_path, "ishares-us", US_CATALOGUE.replace("AAXJ", "AGZ").replace(
+            "/fund/aaxj", "/us/products/100/example"
+        ), 2),
+        save_response(tmp_path, "ishares-us-screener", us, 3),
+        save_response(tmp_path, "ishares-de-screener", eu, 4),
+    ]
+    report = pilot.build_report(tmp_path, attempts, 2)
+    rows = {r["listing"]["symbol"]: r for r in report["records"]}
+    assert rows["AGZ"]["share_class_key"] == "ISIN:US4642881662"
+    assert rows["BB"]["facts"]["ishares-de-screener"]["effectiveDuration"]["r"] == 0
+    assert rows["BB"]["facts"]["ishares-de-screener"]["localExchangeTicker"] == "ANOTHER"
+    assert rows["BB"]["listing"]["symbol"] == "BB"
+    for symbol in ("AGZ", "BB"):
+        record = rows[symbol]
+        assert not record["required_evidence"]["dated_annual_fee"]
+        assert not record["required_evidence"]["dated_duration"]
+        assert not record["comparison_ready"]
+    assert report["sources"]["ishares-us-screener"]["source_date"] is None
+
+    parsed, _ = parse_issuer_screener(us, "US")
+    unattributed = research(rows["AGZ"]["listing"], {"ishares-us-screener": parsed},
+                            report["sources"], {"ishares-us-screener"})
+    assert unattributed["share_class_key"] is None
+    assert len(unattributed["facts"]["unresolved_screener_candidates"]) == 2

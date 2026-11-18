@@ -8,12 +8,19 @@ import json
 from pathlib import Path
 from time import monotonic
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from broader_snapshot import GROUPS, PARSERS, parse_issuer_us, research, select_candidates
 
 
 ROOT = Path(__file__).resolve().parents[1]
+US_SCREENER_QUERY = urlencode({
+    "dcrPath": "/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config",
+})
+DE_SCREENER_QUERY = urlencode({
+    "country": "de", "language": "de", "siteName": "de-ishares-v2", "userType": "individual",
+})
 SOURCES = {
     "nasdaq": "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqtraded.txt",
     "xetra": "https://www.cashmarket.deutsche-boerse.com/resource/blob/1528/fd4f73721b4ba9ab3d3f2b119c3798eb/data/t7-xetr-allTradableInstruments.csv",
@@ -23,6 +30,11 @@ SOURCES = {
     "ishares-de-legacy": "https://www.ishares.com/de/privatanleger/de/produkte/etf-investments",
     "ishares-de-data": "https://www.ishares.com/de/privatanleger/de/product-data.jsn",
     "ishares-us-data": "https://www.ishares.com/us/product-data.jsn",
+    "ishares-us-screener": "https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?" + US_SCREENER_QUERY,
+    "ishares-de-screener": (
+        "https://www.ishares.com/varnish-api/blk-product-screener-server/api/v1/product-screener/product-data?"
+        + DE_SCREENER_QUERY
+    ),
     "danimoth": "https://framerusercontent.com/assets/9P7xYXRDqQbeREtGVGAa9z23Ac.csv",
 }
 MAX_BYTES = 16_000_000
@@ -125,7 +137,7 @@ def build_report(folder, attempts, per_group):
             },
             "source_counts": {
                 key: sum(key in r["facts"] for r in rows)
-                for key in ("ishares-us", "danimoth", "sec")
+                for key in ("ishares-us", "danimoth", "sec", "ishares-us-screener", "ishares-de-screener")
             },
             "secondary_hedge_claims": sum(r["facts"].get("danimoth", {}).get("is_hedged", "") != "" for r in rows),
             "secondary_holdings_counts": sum(bool(r["facts"].get("danimoth", {}).get("number_of_holdings")) for r in rows),
@@ -133,6 +145,13 @@ def build_report(folder, attempts, per_group):
                 r["facts"].get("ishares-us", {}).get("Gross Expense Ratio (%)")
                 or r["facts"].get("danimoth", {}).get("ter")
             ) for r in rows),
+            "screener_undated_duration_claims": sum(
+                r["listing"]["strategy"] == "bond" and any(
+                    isinstance(r["facts"].get(key, {}).get("effectiveDuration"), dict)
+                    for key in ("ishares-us-screener", "ishares-de-screener")
+                )
+                for r in rows
+            ),
         }
     report = {
         "venue_counts": universe["venue_counts"], "exclusions": universe["exclusions"], "coverage": coverage,

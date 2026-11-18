@@ -7,7 +7,7 @@ from html.parser import HTMLParser
 from io import StringIO
 import json
 import re
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 
 GROUPS = ("US/equity", "US/bond", "EU/equity", "EU/bond")
@@ -187,10 +187,39 @@ def parse_product_data(text):
     raise ValueError("Product-data payload has no supported field mapping")
 
 
+def parse_issuer_screener(text, market):
+    document = json.loads(text)
+    if not isinstance(document, dict) or not document or not all(
+        re.fullmatch(r"\d+", key) and isinstance(row, dict) for key, row in document.items()
+    ):
+        raise ValueError("Expected a populated issuer screener keyed by product number")
+    fields = ("isin", "cusip", "localExchangeTicker", "fundName", "productPageUrl", "aladdinAssetClass",
+              "aladdinSubAssetClass", "aladdinRegion", "fees", "netr", "ter", "effectiveDuration",
+              "modelOad", "seriesBaseCurrencyCode")
+    records = defaultdict(list)
+    for product_id, row in document.items():
+        if row.get("productType") != "ISHARES_FUND_DATA" or "etf" not in (row.get("productView") or ()):
+            continue
+        isin = row.get("isin")
+        key = row.get("localExchangeTicker") if market == "US" else isin
+        if not isinstance(isin, str) or not ISIN.fullmatch(isin) or not isinstance(key, str) or not key:
+            continue
+        if market == "US" and not isin.startswith("US"):
+            continue
+        records[key].append({"product_id": product_id, **{name: row.get(name) for name in fields}})
+    if not records:
+        raise ValueError("No attributable ETF identifiers in issuer screener")
+    # The feed has dates for various market observations. It supplies no
+    # field date for its expense ratios or effective duration.
+    return dict(records), None
+
+
 PARSERS = {
     "nasdaq": parse_nasdaq, "xetra": parse_xetra, "sec": parse_sec, "danimoth": parse_danimoth,
     "ishares-de": review_german_catalogue, "ishares-de-legacy": review_german_catalogue,
     "ishares-de-data": parse_product_data, "ishares-us-data": parse_product_data,
+    "ishares-de-screener": lambda text: parse_issuer_screener(text, "EU"),
+    "ishares-us-screener": lambda text: parse_issuer_screener(text, "US"),
 }
 
 
@@ -245,6 +274,27 @@ def research(listing, parsed, sources, attempted_sources):
     if not us and issuer_source in facts and facts[issuer_source]["asset_class"] != listing["strategy"]:
         issues.append("catalogue_and_venue_strategy_disagree")
 
+    screener_source = "ishares-us-screener" if us else "ishares-de-screener"
+    screener_rows = parsed.get(screener_source, {}).get(symbol if us else isin, [])
+    matched = screener_rows
+    if us and screener_rows:
+        catalogue_url = facts.get("ishares-us", {}).get("product_url", "")
+        product = re.match(r"^/us/products/(\d+)(?:/|$)", urlsplit(catalogue_url).path)
+        matched = [row for row in screener_rows if product and row["product_id"] == product[1]]
+    if len(matched) == 1:
+        facts[screener_source] = matched[0]
+        expected_class = {
+            ("US", "equity"): "Equity", ("US", "bond"): "Fixed Income",
+            ("EU", "equity"): "Aktien", ("EU", "bond"): "Anleihen",
+        }[(listing["market"], listing["strategy"])]
+        if matched[0]["aladdinAssetClass"] != expected_class:
+            issues.append("issuer_screener_and_venue_strategy_disagree")
+    elif screener_rows:
+        facts["unresolved_screener_candidates"] = screener_rows
+        issues.append("ambiguous_or_unattributed_issuer_screener_match")
+    elif screener_source in attempted_sources:
+        issues.append("no_attributable_issuer_screener_row")
+
     # SEC identifiers corroborate the symbol only if the published join is unique.
     sec = parsed.get("sec", {}).get(symbol, []) if us else []
     if len(sec) == 1:
@@ -257,14 +307,16 @@ def research(listing, parsed, sources, attempted_sources):
     class_key = None
     if not us and isin and ISIN.fullmatch(isin):
         class_key = f"ISIN:{isin}"
-    if us and "sec" in facts:
+    if us and screener_source in facts:
+        class_key = f"ISIN:{facts[screener_source]['isin']}"
+    elif us and "sec" in facts:
         class_key = f"SEC_CLASS:{facts['sec']['Class ID']}"
 
     required = {
         "listing_venue": bool(listing["venue"]),
         "share_class_identity": bool(class_key),
         "trading_currency": bool(listing["currency"]),
-        # Neither supported bulk catalogue supplies a fee-effective/observation date.
+        # None of the supported bulk catalogues supplies a fee-effective/observation date.
         "dated_annual_fee": False,
         "exposure_description": bool(facts.get("danimoth", {}).get("index_name")),
     }
@@ -274,11 +326,12 @@ def research(listing, parsed, sources, attempted_sources):
     research_sources = {"ishares-us", "ishares-us-data", "sec"} if us else {
         "ishares-de", "ishares-de-legacy", "ishares-de-data", "danimoth"
     }
+    research_sources.add(screener_source)
     return {
         "listing": listing, "listing_source_date": venue_source["source_date"], "share_class_key": class_key,
         "facts": facts,
         "research_attempted": bool(research_sources & attempted_sources),
-        "research_collected": issuer_source in facts or "sec" in facts,
+        "research_collected": any(key in facts for key in (issuer_source, screener_source, "sec")),
         "normalized": True,
         "unresolved": not all(required.values()) or bool(issues),
         "comparison_ready": all(required.values()) and not issues,
