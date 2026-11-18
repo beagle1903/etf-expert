@@ -85,9 +85,11 @@ converter receives each successful issuer observation.
 ## Broader coverage pilot
 
 Issue #3 tested venue-level discovery and bulk research for 40 additional
-listings across US and Xetra equity and bond groups. All 40 yielded partial
-research. The saved sources left material comparison evidence unresolved
-for every listing. See the [scope, observed gaps and replay commands](docs/broader-coverage-2026-11-18.md).
+listings across US and Xetra equity and bond groups. The initial bulk
+sources left material comparison evidence unresolved for every listing.
+The one-time issuer-document review later cleared the evidence gate for
+all 40. See the [initial bulk pilot](docs/broader-coverage-2026-11-18.md)
+and the [full-cohort review](docs/full-cohort-coverage-2026-11-18.md).
 
 ## Continuous integration
 
