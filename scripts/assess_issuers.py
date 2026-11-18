@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-FIELDS = ('identifier', 'legal_entity', 'benchmark', 'fee', 'net_assets', 'share_assets', 'base_currency', 'share_currency',
+FIELDS = ('identifier', 'legal_entity', 'benchmark', 'benchmark_ticker', 'fee', 'net_assets', 'share_assets', 'base_currency', 'share_currency',
           'hedging', 'distribution', 'composition', 'duration', 'maturity', 'yield', 'credit_quality')
 
 
@@ -85,6 +85,7 @@ def parse(text, symbol, url):
         put('net_assets', match(r'Fund total net assets (\$[\d,]+ million)', text), 'USD million ($ source notation)', result['source_dates']['document'])
         put('share_assets', match(r'ETF total net assets (\$[\d,]+ million)', text), 'USD million; ETF shares, not whole fund', result['source_dates']['document'])
         put('benchmark', match(r'Quick facts Benchmark (.*?) Expense ratio', text), as_of=result['source_dates']['other'])
+        put('benchmark_ticker', match(r'Index ticker \(Bloomberg\) ([A-Z0-9]+)', text), 'Bloomberg', result['source_dates']['other'])
         put('distribution', match(r'Dividend schedule (.*?) ETF total net assets', text), as_of=result['source_dates']['other'])
     if eu_vanguard:
         put('legal_entity', match(r'(Vanguard Funds plc)\s+Physical', text), as_of=result['source_dates']['other'])
@@ -99,9 +100,12 @@ def parse(text, symbol, url):
     fee = re.search(r'(Ongoing Charges Figure[^0-9]{0,4}|Total Expense Ratio\s*:?\s*|Expense ratio\s*1?\s*)(\d+(?:\.\d+)?)%', text, re.I)
     if fee:
         put('fee', float(fee[2]), 'percent per year; ' + clean(fee[1]), result['source_dates']['other'])
+        fields['fee']['raw_text'] = fee[0]
     elif 'ssga.com' in url:
         value = match(r'Gross Expense Ratio \(%\) (\d+(?:\.\d+)?)', text)
         put('fee', float(value) if value else None, 'percent per year; gross expense ratio')
+        if fields['fee']:
+            fields['fee']['raw_text'] = f'Gross Expense Ratio (%) {value}'
     if 'Hedged' in text[:250]:
         put('hedging', 'EUR hedged' if re.search(r'(EUR Hedged|Hedged Euro)', text[:250]) else 'hedged; target unresolved', as_of=result['source_dates']['other'])
     # Absence of the word hedged is not evidence of unhedged status.
@@ -137,10 +141,12 @@ def parse(text, symbol, url):
     credit = match(r'(CREDIT (?:RATINGS|QUALITY) \(%\).*?)\s+Credit quality ratings', text)
     if credit and re.search(r'(?:Rated|AAA|BBB).*?\d+\.\d+', credit):
         put('credit_quality', credit[:1000], 'rating bucket weights in percent', result['source_dates']['composition'])
-    if symbol in text and '.' in symbol:
+    if '.' in symbol and re.search(r'(?<![\w.])' + re.escape(symbol) + r'(?![\w.])', text):
         result['listing_evidence'] = 'Exact listing code appears in issuer document: ' + symbol
+        result['listing_match'] = 'exact_code'
     elif '.' not in symbol and re.search(r'\b' + re.escape(symbol) + r'\b', text[:300]):
         result['listing_evidence'] = 'US ticker header plus source identifier; no exchange-independent legal verification'
+        result['listing_match'] = 'ticker_only'
     elif not result['listing_evidence']:
         result['warnings'].append('Exact Yahoo listing code absent; review issuer ticker, exchange and currency table. No automatic identity match.')
     if 'CREDIT RATINGS (%)' in text and not fields['credit_quality']:
@@ -153,6 +159,9 @@ def parse(text, symbol, url):
             for field in ('duration', 'maturity', 'yield', 'credit_quality'):
                 if fields[field]:
                     fields[field]['as_of'] = None
+                    fields[field]['date_status'] = 'conflicting'
+            if symbol == 'VAGF.DE' and fields['composition']:
+                fields['composition']['date_status'] = 'conflicting'
     if us_vanguard and fields['fee']:
         fields['fee']['as_of'] = None
         result['warnings'].append('Fee refers to most recent prospectus; effective date not established by factsheet date.')
@@ -194,6 +203,7 @@ def parse_product(html):
         fields['identifier'] = {'value':value, 'unit':'ISIN', 'as_of':None}
     return {'fields':fields, 'source_dates':{}, 'header':str(properties.get('Share class full name', 'QQQ product page JSON-LD')),
             'listing_evidence':'Product JSON-LD ticker QQQ; exchange and source observation date unresolved' if properties.get('Ticker')=='QQQ' else None,
+            'listing_match':'ticker_only' if properties.get('Ticker')=='QQQ' else 'unresolved',
             'warnings':['Factsheet links returned HTML. Fallback only recovers explicit structured identity. Dynamic fee, holdings, currencies and distribution remain unresolved in this route.']}
 
 
@@ -231,23 +241,30 @@ def main():
     parser.add_argument('runs', nargs='+', type=Path, help='Saved run folders in collection order')
     parser.add_argument('--output', type=Path, required=True, help='Report path; paired JSON stays alongside it')
     args = parser.parse_args()
-    attempts, selected = [], {}
+    attempts, selected, observations = [], {}, []
     universe = json.loads((args.runs[0]/'universe.json').read_text(encoding='utf-8'))
     for folder in args.runs:
         if json.loads((folder/'universe.json').read_text(encoding='utf-8')) != universe:
             raise ValueError('Run universe snapshots differ; do not silently merge different samples')
         for a in json.loads((folder/'collection.json').read_text(encoding='utf-8'))['results']:
             attempts.append({**a, 'run': folder.name})
+            parsed = None
             if a['kind']=='factsheet' and not a['error'] and a.get('text_file'):
-                selected[a['symbol']] = {**parse((folder/a['text_file']).read_text(encoding='utf-8'), a['symbol'], a['url']), 'url': a['url'], 'collected_at_utc': a['collected_at_utc']}
+                parsed = parse((folder/a['text_file']).read_text(encoding='utf-8'), a['symbol'], a['url'])
             elif a['symbol']=='QQQ' and a['kind']=='product' and not a['error']:
-                selected['QQQ'] = {**parse_product((folder/a['raw_file']).read_text(encoding='utf-8')), 'url':a['url'], 'collected_at_utc':a['collected_at_utc']}
+                parsed = parse_product((folder/a['raw_file']).read_text(encoding='utf-8'))
+            if parsed is not None:
+                evidence = {**parsed, 'url': a['url'], 'collected_at_utc': a['collected_at_utc'], 'kind': a['kind']}
+                observations.append({**evidence, 'symbol': a['symbol'], 'attempt_index': len(attempts) - 1})
+                if a['kind'] == 'factsheet' or selected.get(a['symbol'], {}).get('kind') != 'factsheet':
+                    selected[a['symbol']] = evidence
     rows = [{**member, **selected.get(member['symbol'], {'fields':dict.fromkeys(FIELDS), 'warnings':['No parsed factsheet; product-page fallback requires separate review.']})} for member in universe]
     for row in rows:
         row['bond_measures_applicable'] = bond_applicability(row.get('intent'))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(report(rows, attempts), encoding='utf-8')
-    args.output.with_suffix('.json').write_text(json.dumps({'rows':rows, 'attempts':attempts},indent=2),encoding='utf-8')
+    args.output.with_suffix('.json').write_text(json.dumps(
+        {'rows':rows, 'attempts':attempts, 'observations':observations}, indent=2), encoding='utf-8')
     print(args.output)
 
 

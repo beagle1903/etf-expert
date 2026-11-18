@@ -66,6 +66,22 @@ claims, dated composition, undated fields and failures. Missing base currency or
 hedging is not filled from a trading or performance currency. Bond measures are
 not universal equity requirements. No selection or allocation is implemented.
 
+## Source-backed ETF records
+
+Convert the saved diagnostic observations to one local JSON record per requested
+listing. The converter works offline and preserves the evidence needed to review
+listing and share-class links, fees, currencies and material gaps.
+See the [record format, comparison requirements and replay findings](docs/etf-records-2026-11-18.md).
+
+```powershell
+uv run --offline --no-sync python scripts/assess_issuers.py data/runs/issuers-20261117T174001860718Z data/runs/issuers-20261117T174127895555Z data/runs/issuers-20261117T174613957126Z --output data/runs/issuers-20261117T174613957126Z/assessment-records.md
+uv run --offline --no-sync python scripts/normalize_records.py data/runs/issuers-20261117T174613957126Z/assessment-records.json --yahoo-run data/runs/20261117T172137188429Z --output data/runs/records-2026-11-18.json
+```
+
+Use your local run folders. Omit `--yahoo-run` for an issuer-only conversion.
+Regenerate any earlier assessment JSON from its saved run folders so the
+converter receives each successful issuer observation.
+
 ## Continuous integration
 
 GitHub Actions runs the offline tests on pull requests targeting `main` and on
