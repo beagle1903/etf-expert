@@ -1,6 +1,7 @@
 """Collect and replay a bounded US and Xetra ETF coverage pilot."""
 
 import argparse
+import csv
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -77,7 +78,7 @@ def load_sources(folder, attempts):
             text = raw.decode("utf-8-sig")
             rows, source_date = (parse_issuer_us(text, attempt["final_url"]) if key == "ishares-us"
                                  else PARSERS[key](text))
-        except (OSError, ValueError) as exc:
+        except (OSError, ValueError, csv.Error) as exc:
             outcome["error"] = str(exc)
             continue
         parsed[key] = rows

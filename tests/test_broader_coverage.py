@@ -77,3 +77,20 @@ def test_replay_retains_successes_failed_sources_and_frozen_cohort(tmp_path):
     assert new["records"] == report["records"]
     assert new["sources"]["ishares-us"]["raw_file"] == "ishares-us-2.raw"
     assert "No US catalogue rows" in new["parse_outcomes"][-1]["error"]
+
+
+def test_incomplete_nasdaq_refresh_preserves_earlier_parseable_snapshot(tmp_path):
+    attempts = [
+        save_response(tmp_path, "nasdaq", NASDAQ, 0),
+        save_response(tmp_path, "xetra", XETRA, 1),
+        save_response(tmp_path, "nasdaq", NASDAQ.replace(
+            "Y|AAXJ|iShares MSCI Asia ETF|Q|Y|N", "Y|AAXJ"
+        ), 2),
+    ]
+    report = pilot.build_report(tmp_path, attempts, 2)
+    assert report["sources"]["nasdaq"]["raw_file"] == "nasdaq-0.raw"
+    assert report["venue_counts"]["nasdaq"] == 3
+    assert "AAXJ" in [row["listing"]["symbol"] for row in report["records"]]
+    error = report["parse_outcomes"][-1]["error"]
+    assert "Incomplete source row at line 2" in error
+    assert "Security Name" in error

@@ -19,20 +19,28 @@ ISIN = re.compile(r"[A-Z]{2}[A-Z0-9]{9}[0-9]")
 
 
 def table(text, delimiter, required):
-    reader = csv.DictReader(StringIO(text), delimiter=delimiter)
+    reader = csv.DictReader(StringIO(text), delimiter=delimiter, strict=True)
     if not required <= set(reader.fieldnames or ()):
         raise ValueError("Expected columns missing")
     return reader
 
 
+def require_row(row, columns, line):
+    missing = sorted(column for column in columns if row[column] is None)
+    if missing:
+        raise ValueError(f"Incomplete source row at line {line}; missing {', '.join(missing)}")
+
+
 def parse_nasdaq(text):
-    raw = table(text, "|", {"Symbol", "Security Name", "Listing Exchange", "ETF", "Test Issue", "Nasdaq Traded"})
+    columns = {"Symbol", "Security Name", "Listing Exchange", "ETF", "Test Issue", "Nasdaq Traded"}
+    raw = table(text, "|", columns)
     rows, date = [], None
     for row in raw:
         first = row["Nasdaq Traded"]
         if first.startswith("File Creation Time:"):
             date = datetime.strptime(first.split(": ", 1)[1], "%m%d%Y%H:%M").isoformat(timespec="minutes")
             continue
+        require_row(row, columns, raw.line_num)
         name = row["Security Name"].strip()
         if row["ETF"] != "Y" or row["Test Issue"] != "N" or first != "Y":
             continue
@@ -52,10 +60,12 @@ def parse_xetra(text):
     if market.strip() != "Market:;XETR" or not timestamp.startswith("Date Last Update:;"):
         raise ValueError("Expected the XETR reference-file preamble")
     date = datetime.strptime(timestamp.split(";", 1)[1].strip(), "%d.%m.%Y").date().isoformat()
-    raw = table(content, ";", {"Product Status", "Instrument Status", "Instrument Type", "MIC Code",
-                               "Mnemonic", "Instrument", "ISIN", "Currency", "Product Assignment Group Description"})
+    columns = {"Product Status", "Instrument Status", "Instrument Type", "MIC Code", "Mnemonic",
+               "Instrument", "ISIN", "Currency", "Product Assignment Group Description"}
+    raw = table(content, ";", columns)
     rows = []
     for row in raw:
+        require_row(row, columns, raw.line_num + 2)
         if (row["Instrument Type"], row["MIC Code"], row["Instrument Status"], row["Product Status"]) != (
             "ETF", "XETR", "Active", "Active"
         ):
@@ -132,7 +142,9 @@ def parse_issuer_us(text, url):
 def parse_sec(text):
     columns = {"Class Ticker", "Class ID", "Series ID"}
     records = defaultdict(list)
-    for row in table(text, ",", columns):
+    raw = table(text, ",", columns)
+    for row in raw:
+        require_row(row, columns, raw.line_num)
         ticker = row["Class Ticker"].strip()
         if ticker and re.fullmatch(r"C\d{9}", row["Class ID"]) and re.fullmatch(r"S\d{9}", row["Series ID"]):
             item = {key: row[key] for key in ("Class ID", "Series ID")}
@@ -148,7 +160,9 @@ def parse_danimoth(text):
                "number_of_holdings", "snapshot_date", "scraped_at", "source_backend", "source_url"}
     records = defaultdict(list)
     dates = set()
-    for row in table(text, ",", columns):
+    raw = table(text, ",", columns)
+    for row in raw:
+        require_row(row, columns, raw.line_num)
         entry = {k: row[k] for k in sorted(columns)}
         if ISIN.fullmatch(row["isin"]):
             records[row["isin"]].append(entry)
