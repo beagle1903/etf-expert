@@ -2,6 +2,8 @@
 
 A [dated issuer-document spot check](dated-source-check-2026-11-18.md)
 recovered the required evidence for eight members of the same cohort.
+The [full-cohort issuer-document review](full-cohort-coverage-2026-11-18.md)
+subsequently met the comparison gate for all 40.
 
 ## Scope set before collection
 
