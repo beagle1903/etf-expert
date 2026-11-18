@@ -1,5 +1,8 @@
 # Broader ETF coverage — 18 November 2026
 
+A [dated issuer-document spot check](dated-source-check-2026-11-18.md)
+recovered the required evidence for eight members of the same cohort.
+
 ## Scope set before collection
 
 Test 40 additional listings, with 10 iShares equity and 10 iShares bond
