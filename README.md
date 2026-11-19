@@ -91,6 +91,17 @@ The one-time issuer-document review later cleared the evidence gate for
 all 40. See the [initial bulk pilot](docs/broader-coverage-2026-11-18.md)
 and the [full-cohort review](docs/full-cohort-coverage-2026-11-18.md).
 
+## Offline comparison and screening
+
+Run `scripts/screen_etfs.py` on the saved 40-listing review. It renders a
+source-linked Markdown table with a reason for every screening result.
+The [comparison rules and examples](docs/comparison-rules.md) document
+the local input, evidence dates and supported filters.
+
+```powershell
+uv run --offline --no-sync python scripts/screen_etfs.py data/runs/full-cohort-2026-11-18/manual-coverage.json --as-of 2026-11-18
+```
+
 ## Continuous integration
 
 GitHub Actions runs the offline tests on pull requests targeting `main` and on
