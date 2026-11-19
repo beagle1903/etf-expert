@@ -1,5 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
+import json
 import sys
 
 import pytest
@@ -97,6 +98,25 @@ def test_infeasible_profile_keeps_reasons_and_withholds_cash():
     assert result["cash"]["initial_allocated_cents"] == 0
     assert result["cash"]["initial_unallocated_cents"] == 100001
     assert result["blockers"] == ["bond needs 1 distinct positions and only 0 fit the rules"]
+
+
+def test_saved_portfolio_retains_dated_evidence_with_shared_source_url():
+    item = profile()
+    item["allocations"] = [
+        {"strategy": "bond", "positions": 1, "weight_bps": 10000, "fee_metric": "ter", "hedged_to": "EUR"},
+    ]
+    record = fund("A", 12, strategy="bond")
+    record["listing_source"]["collected_at_utc"] = "2026-11-18T08:00:00Z"
+    record["currency_hedge"] = {
+        "target": "EUR", "as_of": "2026-11-06",
+        "source": {**record["listing_source"], "collected_at_utc": "2026-11-18T09:00:00Z"},
+    }
+    result = json.loads(json.dumps(build([record], item)))
+    assert result["status"] == "allocated"
+    for row in (result["candidates"][0], result["positions"][0]):
+        assert row["sources"] == ["https://fund.example/evidence"]
+        assert row["evidence"] == record
+        assert "reported bond hedge matches EUR" in row["reasons"]
 
 
 def test_invalid_profile_reports_inexact_cash_and_invalid_weights():

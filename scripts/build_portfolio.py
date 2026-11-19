@@ -158,6 +158,7 @@ def candidates(records, filters, allocations):
             "below_ig_range_percent": [str(bound) for bound in credit_range] if credit_range else None,
             "credit_as_of": risk.get("credit_as_of"),
             "sources": evidence_sources(record),
+            "evidence": record,
         })
     for row in rows:
         if row["screen_status"] == "passed" and len(identity_labels[row["identity"]]) > 1:

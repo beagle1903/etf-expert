@@ -47,7 +47,9 @@ Requested, researched, eligible, shortlisted and selected counts are
 reported separately. The CLI uses all eligible rows directly, so the
 shortlist count is null. The report preserves per-listing evidence and
 reasons, including exclusions, unknowns and eligible rows omitted by the
-position count or known duplicate rules.
+position count or known duplicate rules. Each candidate and selected
+position includes its input record under `evidence`, preserving collection
+metadata, field dates, and any hedge evidence.
 Researched means there is a source link for the fee, exposure or bond risk.
 Comparison-ready follows the baseline evidence rules for the comparison
 date. Eligible applies the profile and rejects conflicting identity links.
