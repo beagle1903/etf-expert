@@ -102,6 +102,13 @@ the local input, evidence dates and supported filters.
 uv run --offline --no-sync python scripts/screen_etfs.py data/runs/full-cohort-2026-11-18/manual-coverage.json --as-of 2026-11-18
 ```
 
+## Illustrative allocation
+
+`scripts/build_portfolio.py` reads the same saved snapshot and a local
+profile. It applies the profile's asset-class and fee rules, then reports
+candidate decisions, weights, and cash amounts. See the
+[selection rules and complete example](docs/portfolio-rules.md).
+
 ## Continuous integration
 
 GitHub Actions runs the offline tests on pull requests targeting `main` and on
