@@ -1,8 +1,49 @@
 # ETF Expert
 
-A simple local US+EU ETF research project. The first milestone measures whether obtainable data supports useful comparison across a broader universe. Portfolio selection comes after that evidence.
+A local command-line tool for US and Xetra ETF research, screening and illustrative allocation.
 
 Early phases use Python scripts and local JSON/Markdown files. No GUI, Docker, agent framework, in-app LLM, or harness subagents.
+
+## Local workflow
+
+Install the locked Python environment with
+`uv sync --locked --dev --python 3.14.0`. Use the scripts in order.
+
+1. Run `scripts/check_broader_coverage.py` with a new local run folder,
+   `--fetch nasdaq xetra --per-group 10`, and an optional timeout. The
+   command saves the discovery cohort as `pilot-universe.json`. Run it
+   again without `--fetch` to replay saved inputs.
+2. Collect and review issuer facts for the requested listings using the
+   [full-cohort review](docs/full-cohort-coverage-2026-11-18.md) as an
+   example. Keep source files and a local `reviewed.json` with a
+   `records` array and any `attempts`. Use the exact discovery
+   `listing` object in each row. Add the class `identifier` with
+   `type` and `value`, `trading_currency`, `listing_source`,
+   `fee_and_exposure_source`, `exposure`, and `annual_fees` claims.
+   Each fee needs a named `metric`, a `raw_percent` or
+   `annual_basis_points`, and its own `as_of` date. Source objects
+   include `url` and `collected_at_utc` when known. For bonds, add
+   `bond_risk` with `duration_method`, `duration_years`,
+   `duration_as_of`, `credit_weights_percent`, `credit_as_of`
+   and its `source`. Preserve conflicting and missing claims as covered
+   in the [comparison rules](docs/comparison-rules.md#saved-input).
+3. Assemble the pinned cohort and reviewed facts, then screen or allocate
+   from that snapshot. The assembler retains unreviewed members and
+   collection attempts, and converts explicit fee percentages to basis
+   points where the normalized amount is missing.
+
+```powershell
+$run = "data/runs/my-research"
+uv run --offline --no-sync python scripts/prepare_snapshot.py "$run/pilot-universe.json" "$run/reviewed.json" --output "$run/snapshot.json"
+uv run --offline --no-sync python scripts/screen_etfs.py "$run/snapshot.json" --as-of 2026-11-18 --output "$run/comparison.md"
+uv run --offline --no-sync python scripts/build_portfolio.py "$run/snapshot.json" "$run/profile.json" --output "$run/portfolio.json"
+```
+
+Use your evidence date and a [local allocation profile](docs/portfolio-rules.md).
+The Git checkout contains the tooling. Saved provider responses, reviewed
+datasets and outputs stay on the machine that collected or copied them.
+The [acceptance report](docs/cli-acceptance-2026-11-20.md) distinguishes
+the live venue fetch, historical issuer evidence and offline replay.
 
 ## First milestone: data feasibility
 
@@ -18,7 +59,7 @@ The check collects Yahoo profile data, recent daily prices and reported top hold
 
 The sample labels are research intentions, not verified classifications. Yahoo trading currency is not assumed to be fund base currency. Collection time does not establish the observation date of a profile or holdings field.
 
-Next: inspect the real gaps, test issuer supplementation for material missing fields, then demonstrate comparison and transparent selection on the broader pool. No portfolio recommendation or suitability claim is made.
+The later sections describe the issuer supplementation, broader cohort, and comparison and allocation commands.
 
 ## Observed first pass
 
@@ -64,7 +105,7 @@ use locally collected run folders in chronological order; the ignored evidence
 is not distributed with the repository. A report distinguishes extracted source
 claims, dated composition, undated fields and failures. Missing base currency or
 hedging is not filled from a trading or performance currency. Bond measures are
-not universal equity requirements. No selection or allocation is implemented.
+not universal equity requirements. This diagnostic replay covers issuer evidence.
 
 ## Source-backed ETF records
 
