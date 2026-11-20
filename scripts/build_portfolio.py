@@ -130,8 +130,11 @@ def candidates(records, filters, allocations):
         allocation = allocations.get(strategy)
         result = assess(record, rules[strategy]) if allocation else base
         status, reasons = result["status"], result["reasons"].copy()
-        if allocation is None:
+        if allocation is None and strategy in ("equity", "bond"):
             status, reasons = "failed", ["asset class has no profile allocation", *reasons]
+        elif allocation is None:
+            status = "unknown" if status != "failed" else status
+            reasons.append("asset class is unresolved")
         fee = None
         if status == "passed":
             fee, problem = fee_evidence(record, allocation.fee_metric, rules[strategy])

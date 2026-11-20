@@ -45,6 +45,12 @@ datasets and outputs stay on the machine that collected or copied them.
 The [acceptance report](docs/cli-acceptance-2026-11-20.md) distinguishes
 the live venue fetch, historical issuer evidence and offline replay.
 
+For an explicit U.S. ticker list, `scripts/discover_tickers.py` resolves a
+pinned JSON `tickers` array against a saved Nasdaq Trader directory and its
+collection metadata. It retains missing and ambiguous symbols and does not
+infer asset class from the name. Review the issuer facts and classification
+before assembling the snapshot. See the [25-ticker pilot](docs/user-ticker-pilot-2026-11-20.md).
+
 ## First milestone: data feasibility
 
 The initial diagnostic sample contains 24 listings: 12 US and 12 EU listings across equity and bond strategies. It is a deliberately chosen coverage sample, not a complete catalogue or an eligible portfolio pool. EU means listing venue; underlying investments may be global. London listings are excluded from this sample.
