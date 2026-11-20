@@ -128,7 +128,7 @@ def candidates(records, filters, allocations):
         listing = record["listing"]
         strategy = listing.get("strategy")
         allocation = allocations.get(strategy)
-        result = assess(record, rules[strategy]) if allocation else base
+        result = assess(record, rules[strategy]) if allocation else assess(record, filters)
         status, reasons = result["status"], result["reasons"].copy()
         if allocation is None and strategy in ("equity", "bond"):
             status, reasons = "failed", ["asset class has no profile allocation", *reasons]

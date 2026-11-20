@@ -47,7 +47,8 @@ def main():
     parser.add_argument("source_metadata", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if args.output.resolve() in {p.resolve() for p in (args.request, args.directory, args.source_metadata)}:
+    outputs = {args.output.resolve(), args.output.with_suffix(".tmp").resolve()}
+    if outputs & {p.resolve() for p in (args.request, args.directory, args.source_metadata)}:
         parser.error("Output must differ from inputs")
     try:
         result = discover(json.loads(args.request.read_text(encoding="utf-8-sig")), args.directory.read_bytes(),

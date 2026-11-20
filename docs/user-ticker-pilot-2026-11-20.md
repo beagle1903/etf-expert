@@ -100,3 +100,6 @@ uv run --offline --no-sync python scripts/screen_etfs.py "$run/expanded-snapshot
 
 The combined snapshot is retained directly, with every baseline and trial
 record and the source attempts. Replay does not access the network.
+After the profile-exclusion fix, ten already-excluded baseline bond rows
+also show their applicable market and currency reasons. The counts and
+selected positions remain unchanged from the original pilot.
