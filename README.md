@@ -55,6 +55,48 @@ The [cross-venue pilot](docs/cross-venue-coverage-2026-11-22.md) measures
 comparison readiness for eight iShares and Vanguard listings on U.S. venues
 and Xetra.
 
+### Issuer-review worksheet
+
+Use the worksheet to fill in issuer claims without copying listing records.
+Start with a discovery cohort, or give `init` a pinned U.S. `tickers` JSON
+list. For a ticker list, provide both `--directory` and `--source-metadata`
+to match against a saved Nasdaq Trader file. With no directory, ticker
+venues stay unresolved. A pinned `listings` array with fields such as
+market and symbol can also be used.
+
+```powershell
+$run = "data/runs/my-research"
+uv run --offline --no-sync python scripts/review_worksheet.py init "$run/pilot-universe.json" --output "$run/worksheet.json"
+# Edit the review entries in worksheet.json, then run:
+uv run --offline --no-sync python scripts/review_worksheet.py export "$run/worksheet.json" --as-of 2026-11-20 --output "$run/reviewed.json"
+uv run --offline --no-sync python scripts/prepare_snapshot.py "$run/worksheet.json" "$run/reviewed.json" --output "$run/snapshot.json"
+```
+
+Keep the prefilled listing and row keys. Each row starts with
+`"review": null`. Replace that value with an object containing the
+issuer fields listed in step 2, excluding the copied `listing` object.
+For a listing with no strategy, add `"reviewed_strategy": "equity"`
+or `"bond"` with the `fee_and_exposure_source` that establishes it.
+Leave untouched rows at `null` and record source attempts in `attempts`.
+Unmatched or ambiguous directory rows remain visible. Use saved discovery
+evidence to resolve the venue before expecting a comparison-ready record.
+
+Export shows field and date gaps, fee disagreements under the comparison
+rules, and reviewer-flagged conflicts for each listing. Keep competing fee
+claims as separate entries in `annual_fees`. For other fields, preserve
+the alternate claims and their source details in a `conflicting_claims`
+array and name the affected fields in `conflicts`, as described in the
+[comparison rules](docs/comparison-rules.md#saved-input). Export keeps the
+claims as entered for the existing snapshot workflow.
+
+The [25-ticker pilot](docs/user-ticker-pilot-2026-11-20.md) reported several
+minutes of manual source selection, checking and preparation. The
+worksheet removes the listing-copy step and moves evidence checks before
+snapshot assembly. Issuer source selection and fact review still require
+manual work. An offline round trip of the saved 65-listing pilot produced
+identical screening and allocation outputs, with 57 comparison-ready,
+18 eligible and three selected. That replay did not measure time savings.
+
 ## First milestone: data feasibility
 
 The initial diagnostic sample contains 24 listings: 12 US and 12 EU listings across equity and bond strategies. It is a deliberately chosen coverage sample, not a complete catalogue or an eligible portfolio pool. EU means listing venue; underlying investments may be global. London listings are excluded from this sample.
