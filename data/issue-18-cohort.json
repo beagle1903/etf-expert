@@ -1,0 +1,15 @@
+{
+  "issue": 18,
+  "pinned_on": "2026-11-22",
+  "selection_rule": "Two issuers from the preceding pilots, one equity and one diversified aggregate bond listing per issuer and market. Use S&P 500 equity for the comparable strategy anchor, reuse the issue 17 U.S. equity anchors and unresolved IUSB bond, and choose aggregate bond and Xetra equity counterparts by mandate. These are sampling targets, not verified listing or exposure claims. Keep each request even if evidence is missing; do not substitute.",
+  "listings": [
+    {"issuer": "iShares", "market": "US", "symbol": "IVV", "strategy": "equity"},
+    {"issuer": "iShares", "market": "US", "symbol": "IUSB", "strategy": "bond"},
+    {"issuer": "iShares", "market": "EU", "symbol": "SXR8", "strategy": "equity"},
+    {"issuer": "iShares", "market": "EU", "symbol": "EUNA", "strategy": "bond"},
+    {"issuer": "Vanguard", "market": "US", "symbol": "VOO", "strategy": "equity"},
+    {"issuer": "Vanguard", "market": "US", "symbol": "BND", "strategy": "bond"},
+    {"issuer": "Vanguard", "market": "EU", "symbol": "VUAA", "strategy": "equity"},
+    {"issuer": "Vanguard", "market": "EU", "symbol": "VAGF", "strategy": "bond"}
+  ]
+}
