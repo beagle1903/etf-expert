@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from check_broader_coverage import save_json
-from screen_etfs import FEE_METRICS, decimal
+from screen_etfs import FEE_METRICS, conflict, decimal, source_url
 
 
 def listing_key(listing):
@@ -32,10 +32,17 @@ def prepare_snapshot(cohort, reviewed):
 
     records = []
     for key in keys:
+        listing = discovered[key]
         if key not in review_by_key:
-            records.append({"listing": discovered[key], "review_status": "missing"})
+            records.append({"listing": listing, "review_status": "missing"})
             continue
         record = review_by_key[key]
+        if (strategy := record.get("reviewed_strategy")) is not None:
+            if (listing.get("strategy") is not None or strategy not in ("equity", "bond")
+                    or not source_url(record.get("fee_and_exposure_source"))
+                    or conflict(record, "strategy")):
+                raise ValueError(f"Cannot apply reviewed strategy to {key}")
+            record = {**record, "listing": {**listing, "strategy": strategy}}
         fees = []
         for claim in record.get("annual_fees") or ():
             percent = decimal(claim.get("raw_percent"))
